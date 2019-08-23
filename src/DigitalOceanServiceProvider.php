@@ -45,11 +45,11 @@ class DigitalOceanServiceProvider extends ServiceProvider
      */
     protected function setupConfig()
     {
-        $source = realpath($raw = __DIR__.'/../config/digitalocean.php') ?: $raw;
+        $source = realpath($raw = __DIR__.'/../config/digital-ocean.php') ?: $raw;
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                $source => $this->app->config_path('digitalocean.php')
+                $source => $this->app->config_path('digital-ocean.php')
             ]);
         }
 

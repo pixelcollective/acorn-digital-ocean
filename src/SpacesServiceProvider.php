@@ -6,6 +6,7 @@ use Aws\S3\S3Client;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use League\Flysystem\Filesystem;
 use Roots\Acorn\ServiceProvider;
+use Illuminate\Support\Facades\Storage;
 
 class SpacesServiceProvider extends ServiceProvider
 {
@@ -16,13 +17,24 @@ class SpacesServiceProvider extends ServiceProvider
     {
     }
 
+    /**
+     * Boot application services.
+     */
     public function boot()
     {
-        $this->app['storage']->extend('spaces', [$this, 'configureSpaces']);
-
-        dd($this->app['storage']);
+        Storage::extend('spaces', function ($app, $config) {
+            $this->configureSpaces($app, $config);
+        });
     }
 
+    /**
+     * Configure spaces.
+     *
+     * @param  Application $app
+     * @param  array       $config
+     *
+     * @return void
+     */
     protected function configureSpaces($app, $config)
     {
         $spacesAdapter = new AwsS3Adapter(

@@ -42,7 +42,8 @@
     "acorn": {
       "providers": [
         "TinyPixel\\Acorn\\DigitalOcean\\DigitalOceanServiceProvider",
-        "TinyPixel\\Acorn\\DigitalOcean\\SpacesServiceProvider"
+        "TinyPixel\\Acorn\\DigitalOcean\\SpacesServiceProvider",
+        "TinyPixel\\Acorn\\DigitalOcean\\PackageServiceProvider"
       ]
     }
   }
