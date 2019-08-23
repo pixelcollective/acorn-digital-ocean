@@ -25,6 +25,6 @@ class PackageServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $do = $this->app->make('digitalocean.wp');
+        $this->app->make('digitalocean.wp');
     }
 }
