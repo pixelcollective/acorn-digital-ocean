@@ -3,7 +3,11 @@
 namespace TinyPixel\Acorn\DigitalOcean;
 
 use TinyPixel\Acorn\DigitalOcean\DigitalOcean;
+use Roots\Acorn\ServiceProvider;
 
+/**
+ * Business logics
+ */
 class PackageServiceProvider extends ServiceProvider
 {
     /**
@@ -11,8 +15,8 @@ class PackageServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('digitalocean.acorn', function () {
-            return new DigitalOcean();
+        $this->app->singleton('digitalocean.wp', function ($app) {
+            return new DigitalOcean($app->make('digitalocean'));
         });
     }
 
@@ -21,9 +25,6 @@ class PackageServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $digitalOcean = $this->app->make('digitalocean.acorn');
-        $digitalOcean();
-
-        dd($this);
+        $do = $this->app->make('digitalocean.wp');
     }
 }

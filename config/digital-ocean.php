@@ -1,5 +1,7 @@
 <?php
 
+use \Roots\env;
+
 return [
 
     /*
@@ -30,7 +32,7 @@ return [
     'connections' => [
         'main' => [
             'driver'  => 'guzzlehttp',
-            'token'   => 'your-token',
+            'token'   => env('DO_API_KEY'),
         ],
     ],
 ];

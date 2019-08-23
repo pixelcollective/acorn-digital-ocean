@@ -2,6 +2,7 @@
 
 namespace TinyPixel\Acorn\DigitalOcean;
 
+use DigitalOceanV2\Entity\Account;
 use GrahamCampbell\DigitalOcean\DigitalOceanManager;
 
 /**
@@ -13,27 +14,88 @@ use GrahamCampbell\DigitalOcean\DigitalOceanManager;
 class DigitalOcean
 {
     /**
-     * DigitalOcean
+     * Digital Ocean
+     * @var \GrahamCampbell\DigitalOcean\DigitalOceanManager
      */
-    protected $digitalocean;
+    protected static $api;
 
     /**
-     * Constructor.
+     * Region API
+     * @var
+     */
+    protected static $region;
+
+    /**
+     * Droplet API
+     * @var
+     */
+    protected static $droplet;
+
+    /**
+     * Account API
+     * @var
+     */
+    protected static $account;
+
+    /**
+     * Size API
+     * @var
+     */
+    protected static $size;
+
+    /**
+     * API pluralizations
+     * @var array
+     */
+    protected static $apiInflection = [
+        'Regions'  => 'region',
+        'Droplets' => 'droplet',
+        'Accounts' => 'account',
+        'Sizes'    => 'size',
+    ];
+
+    /**
+     * Class constructor.
      *
      * @param \GrahamCampbell\DigitalOcean\DigitalOceanManager $do
      */
     public function __construct(DigitalOceanManager $do)
     {
-        $this->digitalocean = $digitalocean;
+        self::$api     = $do;
+        self::$region  = $do->region();
+        self::$droplet = $do->droplet();
+        self::$account = $do->account();
+        self::$size    = $do->size();
     }
 
     /**
-     * Method
+     * Callable APIs.
      *
-     * @return void
+     * @param string $api
+     * @param string $params
      */
-    public function __invoke() : void
+    public function __call(string $apiCall, array $params = [])
     {
-        return $this->digitalocean->region()->getAll();
+        if(strstr($apiCall, 'all')) {
+            $api = explode('all', $apiCall)[1];
+
+            if (!isset(self::$inflection[$api])) {
+                return 'invalid api!';
+            }
+
+            $callableApi = self::$inflection[$api];
+
+            return self::${$callableApi}->getAll();
+        }
+    }
+
+    /**
+     * Get account information.
+     *
+     * @return array
+     */
+    public function accountInfo() : Account
+    {
+        return self::$account->getUserInformation();
     }
 }

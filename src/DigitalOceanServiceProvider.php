@@ -3,6 +3,8 @@
 namespace TinyPixel\Acorn\DigitalOcean;
 
 use DigitalOceanV2\DigitalOceanV2;
+use GrahamCampbell\DigitalOcean\DigitalOceanFactory;
+use GrahamCampbell\DigitalOcean\DigitalOceanManager;
 use GrahamCampbell\DigitalOcean\Adapters\ConnectionFactory as AdapterFactory;
 use Illuminate\Contracts\Container\Container;
 use Roots\Acorn\Application;
