@@ -51,7 +51,7 @@ class DigitalOceanServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                $source => $this->app->config_path('digital-ocean.php')
+                $source => $this->app->configPath('digital-ocean.php')
             ]);
         }
 
