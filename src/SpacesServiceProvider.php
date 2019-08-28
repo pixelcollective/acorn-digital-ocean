@@ -3,52 +3,64 @@
 namespace TinyPixel\Acorn\DigitalOcean;
 
 use Aws\S3\S3Client;
+use Illuminate\Support\Facades\Storage;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use League\Flysystem\Filesystem;
 use Roots\Acorn\ServiceProvider;
-use Illuminate\Support\Facades\Storage;
 
 class SpacesServiceProvider extends ServiceProvider
 {
     /**
-     * Register application services
+     * Register application services.
+     *
+     * @return void
      */
-    public function register()
+    public function register() : void
     {
+        $configSource = realpath($raw = __DIR__ . '/../config/filesystems.php') ?: $raw;
+
+        $this->mergeConfigFrom($configSource, 'filesystems');
     }
 
     /**
      * Boot application services.
+     *
+     * @return void
      */
-    public function boot()
+    public function boot() : void
     {
         Storage::extend('spaces', function ($app, $config) {
-            $this->configureSpaces($app, $config);
+            return new Filesystem($this->spacesAdapter($config, $config['bucket']));
         });
     }
 
     /**
-     * Configure spaces.
+     * Spaces adapter for Flysystem.
      *
-     * @param  Application $app
-     * @param  array       $config
-     *
-     * @return void
+     * @param  array $config
+     * @return League\Flysystem\AwsS3v3\AwsS3Adapter
      */
-    protected function configureSpaces($app, $config)
+    protected function spacesAdapter(array $config, string $bucket) : AwsS3Adapter
     {
-        $spacesAdapter = new AwsS3Adapter(
-            new S3Client([
-                'credentials' => [
-                    'key'    => $config['key'],
-                    'secret' => $config['secret'],
-                ],
-                'region'   => $config['region'],
-                'version'  => $config['version'],
-                'endpoint' => $config['region'],
-            ])
+        return new AwsS3Adapter(
+            $this->spacesClient($config),
+            $bucket
         );
+    }
 
-        return new Filesystem($spacesAdapter, $config['bucket']);
+    /**
+     * Spaces connection object.
+     *
+     * @param  array $config
+     * @return Aws\S3\S3Client
+     */
+    protected function spacesClient(array $config) : S3Client
+    {
+        return new S3Client([
+            'credentials' => $config['credentials'],
+            'region' => $config['region'],
+            'version' => $config['version'],
+            'endpoint' => $config['endpoint'],
+        ]);
     }
 }

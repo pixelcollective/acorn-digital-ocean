@@ -31,8 +31,8 @@ return [
 
     'connections' => [
         'main' => [
-            'driver'  => 'guzzlehttp',
-            'token'   => env('DO_API_KEY'),
+            'driver' => 'guzzlehttp',
+            'token'  => env('DO_API_KEY'),
         ],
     ],
 ];
