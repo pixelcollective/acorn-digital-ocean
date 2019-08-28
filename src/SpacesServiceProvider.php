@@ -35,7 +35,7 @@ class SpacesServiceProvider extends ServiceProvider
     }
 
     /**
-     * Spaces adapter for Flysystem.
+     * Spaces adapter.
      *
      * @param  array $config
      * @return League\Flysystem\AwsS3v3\AwsS3Adapter
@@ -49,7 +49,7 @@ class SpacesServiceProvider extends ServiceProvider
     }
 
     /**
-     * Spaces connection object.
+     * Spaces client.
      *
      * @param  array $config
      * @return Aws\S3\S3Client
