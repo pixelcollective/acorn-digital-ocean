@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Filesystem\FilesystemManager as Filesystem;
 use Roots\Acorn\Application;
 
-class SpacesStorage
+class Sync
 {
     /** @var \Illuminate\Support\Collection */
     public static $locations;
@@ -28,7 +28,7 @@ class SpacesStorage
      *
      * @return void
      */
-    public function __construct(Filesystem $filesystem, Application $app)
+    public function __construct(LocalFilesystem $localFilesystem, EdgeProvider $edgeFilesystem, Application $app)
     {
         $appDir = $app['config']->get(
             'filesystems.disk.local.root'
@@ -42,8 +42,8 @@ class SpacesStorage
         ];
 
         self::$disks = (object) [
-            'local'  => $filesystem->disk('local'),
-            'remote' => $filesystem->disk('spaces'),
+            'local'  => $localFilesystem,
+            'remote' => $edgeFilesystem,
         ];
 
         $this->fs = (object) [];
@@ -63,11 +63,6 @@ class SpacesStorage
         $this->processDirectories();
 
         $this->processFiles();
-
-        /**
-         * Todo: complete WordPress integration
-         */
-        // add_action('plugins_loaded', [$this, 'hooks']);
     }
 
     /**
@@ -95,10 +90,12 @@ class SpacesStorage
      */
     protected function processDirectories()
     {
-        $this->newDirs = $this->fs->local->dirs->except(
+        $writeDirs = $this->fs->local->dirs->except(
             $this->fs->remote->dirs
-        )->each(function ($dir) {
-            $this->mkdir($this->destination($dir));
+        );
+
+        $writeDirs->each(function ($dir) {
+            $this->makeDirectory($dir);
         });
     }
 
@@ -109,10 +106,12 @@ class SpacesStorage
      */
     protected function processFiles()
     {
-        $this->newFiles = $this->fs->local->files->except(
+        $new = $this->fs->local->files->except(
             $this->fs->remote->files
-        )->each(function ($file) {
-            $this->touch($this->destination($file), $this->localFileContents($file));
+        );
+
+        $new->each(function ($file) {
+            $this->writeFile($file, $this->localFileContents($file));
         });
     }
 
@@ -132,10 +131,9 @@ class SpacesStorage
      * @param  string
      * @return void
      */
-    protected function touch(string $destination, string $file)
+    protected function writeFile(string $fileName, string $fileContents)
     {
-        self::$disks->remote->put($destination, $file, 'public');
-        dump(["[mock] creating remote file: {$file}"]);
+        self::$disks->remote->put($fileName, $fileContents, 'public');
     }
 
     /**
@@ -144,37 +142,8 @@ class SpacesStorage
      * @param  string
      * @return void
      */
-    protected function mkdir(string $dir)
+    protected function makeDirectory(string $dir)
     {
         self::$disks->remote->makeDirectory($dir, 'public');
-        dump(["[mock] creating remote dir: {$dir}"]);
-    }
-
-    /**
-     * Destination locator.
-     *
-     * @param  string $file
-     * @return string
-     */
-    protected function destination(string $file)
-    {
-        return self::$stores->remote . '/' . $file;
-    }
-
-    /**
-     * Hooks.
-     *
-     * @return void
-     */
-    public function hoooks()
-    {
-        add_filter('upload_dir', [$this, 'filterUploadDir']);
-        add_filter('wp_image_editors', [$this, 'filterEditors'], 9);
-        add_action('delete_attachment', [$this, 'deleteAttachmentFiles']);
-        add_filter('wp_read_image_metadata', [$this, 'wpFilterReadImageMetadata'], 10, 2);
-        add_filter('wp_resource_hints', [$this, 'wpFilterResourceHints'], 10, 2);
-        add_action('wp_handle_sideload_prefilter', [$this, 'filterSideload']);
-
-        remove_filter('admin_notices', 'wpthumb_errors');
     }
 }

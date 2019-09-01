@@ -1,5 +1,4 @@
 <?php
-
 namespace TinyPixel\Acorn\DigitalOcean;
 
 use Aws\S3\S3Client;
